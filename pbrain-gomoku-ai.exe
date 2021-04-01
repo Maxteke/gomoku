@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+
+import sys, os
+import random
+import time
+from math import exp
+
+random.seed()
+
+# bestNeuralNetworkEver = trainAI.champion
+
+if len(sys.argv) != 1:
+	print("No parameters needed.", file=sys.stderr)
+	sys.exit(84)
+
+class Handler:
+	def __init__(self):
+		self.infos = {}
+		self.size = 0
+		self.boarding = False
+		pass
+	def run(self):
+		end = False
+		while not end:
+			cmd = input().rstrip()
+			end = self.handleCommand(cmd)
+	def nextMove(self):
+		i,j = random.randint(0,19),random.randint(0,19)
+		while self.board[i][j] != 0:
+			i,j = random.randint(0,19),random.randint(0,19)
+		self.board[i][j] = 1
+		return str(i)+','+str(j)
+	def printLog(self, s: str):
+		print(s)
+	def handleCommand(self, cmd):
+		if self.boarding and not cmd.startswith('DONE'):
+			spl = [int(v) for v in cmd.split(',')]
+			self.board[spl[0]][spl[1]] = spl[2]
+			return False
+		if cmd.startswith('END'):
+			return True
+		elif cmd.startswith('START'):
+			if int(cmd[6:]) != 20:
+				self.printLog('ERROR unsupported size must be square of 20')
+			else:
+				self.size = int(cmd[6:])
+				self.board = [[0 for i in range(self.size)] for j in range(self.size)]
+				self.printLog('OK')
+			return False
+		elif cmd.startswith('INFO'):
+			spl = cmd.split(' ')
+			self.infos[spl[1]] = spl[2]
+			return False
+		elif cmd.startswith('TURN'):
+			spl = cmd[5:].split(',')
+			self.board[int(spl[0])][int(spl[1])] = 2
+			self.printLog(self.nextMove())
+			return False
+		elif cmd.startswith('BEGIN'):
+			self.printLog(self.nextMove())
+			return False
+		elif cmd.startswith('RESTART'):
+			self.board = [[0 for i in range(self.size)] for j in range(self.size)]
+			self.printLog('OK')
+			return False
+		elif cmd.startswith('BOARD'):
+			self.boarding = True
+			return False
+		elif cmd.startswith('DONE'):
+			self.boarding = False
+			return False
+		elif cmd.startswith('ABOUT'):
+			self.printLog('name="nazo", version="15.6.8", author="Najo", country="FR"')
+			return False
+		return False
+
+handler = Handler()
+try:
+	handler.run()
+except Exception as e:
+	print('main error :' + str(e))
